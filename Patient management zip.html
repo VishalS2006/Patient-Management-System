@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .auth-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-block {
+            width: 100%;
+            display: block;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .btn-success {
+            background-color: #27ae60;
+        }
+        .btn-success:hover {
+            background-color: #219653;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .section {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+        .stats-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .container, .auth-container {
+                padding: 10px;
+            }
+            nav {
+                flex-direction: column;
+            }
+            nav button {
+                width: 100%;
+            }
+            .action-btns {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="appContainer">
+        <!-- Login/Register Section -->
+        <div id="authSection" class="auth-container">
+            <h1>Patient Management System</h1>
+            <div id="loginForm">
+                <h2>Login</h2>
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button id="loginBtn" class="btn-block">Login</button>
+                <p id="authMessage" class="message"></p>
+                <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
+            </div>
+
+            <div id="registerForm" style="display: none;">
+                <h2>Register</h2>
+                <div class="form-group">
+                    <label for="regUsername">Username:</label>
+                    <input type="text" id="regUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password:</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <button id="registerBtn" class="btn-block">Register</button>
+                <p id="regMessage" class="message"></p>
+                <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+            </div>
+        </div>
+
+        <!-- Main Application (hidden until login) -->
+        <div id="mainApp" style="display: none;">
+            <h1>Patient Management Dashboard</h1>
+            <nav>
+                <button id="dashboardBtn">Dashboard</button>
+                <button id="patientsBtn">Patients</button>
+                <button id="addPatientBtn">Add Patient</button>
+                <button id="appointmentsBtn">Appointments</button>
+                <button id="addAppointmentBtn">Schedule Appointment</button>
+                <button id="logoutBtn" class="btn-danger">Logout</button>
+            </nav>
+
+            <!-- Dashboard Section -->
+            <div id="dashboardSection" class="section active">
+                <h2>System Overview</h2>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Total Patients</h3>
+                        <div class="stat-value" id="totalPatients">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Upcoming Appointments</h3>
+                        <div class="stat-value" id="upcomingAppointments">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Completed Appointments</h3>
+                        <div class="stat-value" id="completedAppointments">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patients List Section -->
+            <div id="patientsSection" class="section">
+                <h2>Patient Records</h2>
+                <div class="form-group">
+                    <input type="text" id="patientSearch" placeholder="Search patients..." oninput="loadPatients()">
+                </div>
+                <table id="patientsTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Phone</th>
+                            <th>Transport</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsList">
+                        <!-- Patients will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add Patient Section -->
+            <div id="addPatientSection" class="section">
+                <h2>Add New Patient</h2>
+                <form id="patientForm">
+                    <div class="form-group">
+                        <label for="patientName">Full Name *</label>
+                        <input type="text" id="patientName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientAge">Age</label>
+                        <input type="number" id="patientAge">
+                    </div>
+                    <div class="form-group">
+                        <label for="patientGender">Gender</label>
+                        <select id="patientGender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientPhone">Phone</label>
+                        <input type="tel" id="patientPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="patientAddress">Address</label>
+                        <textarea id="patientAddress"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientTransport">Transport Mode</label>
+                        <select id="patientTransport">
+                            <option value="Walk-in">Walk-in</option>
+                            <option value="Ambulance">Ambulance</option>
+                            <option value="Private Vehicle">Private Vehicle</option>
+                            <option value="Public Transport">Public Transport</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientEmergencyContact">Emergency Contact</label>
+                        <input type="text" id="patientEmergencyContact">
+                    </div>
+                    <button type="submit" class="btn-block btn-success">Save Patient</button>
+                    <p id="patientMessage" class="message"></p>
+                </form>
+            </div>
+
+            <!-- Appointments Section -->
+            <div id="appointmentsSection" class="section">
+                <h2>Appointments</h2>
+                <div class="form-group">
+                    <select id="appointmentFilter" onchange="loadAppointments()">
+                        <option value="all">All Appointments</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <table id="appointmentsTable">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsList">
+                        <!-- Appointments will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add Appointment Section -->
+            <div id="addAppointmentSection" class="section">
+                <h2>Schedule New Appointment</h2>
+                <form id="appointmentForm">
+                    <div class="form-group">
+                        <label for="appointmentPatient">Patient *</label>
+                        <select id="appointmentPatient" required>
+                            <option value="">Select Patient</option>
+                            <!-- Patients will be loaded here -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentDate">Date *</label>
+                        <input type="date" id="appointmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentTime">Time *</label>
+                        <input type="time" id="appointmentTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentPurpose">Purpose *</label>
+                        <input type="text" id="appointmentPurpose" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentNotes">Notes</label>
+                        <textarea id="appointmentNotes"></textarea>
+                    </div>
+                    <button type="submit" class="btn-block btn-success">Schedule Appointment</button>
+                    <p id="appointmentMessage" class="message"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Appointment Detail Modal -->
+        <div id="appointmentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalAppointmentTitle">Appointment Details</h2>
+                    <button class="close-modal" onclick="closeModal()">&times;</button>
+                </div>
+                <div id="modalAppointmentContent">
+                    <!-- Appointment details will be loaded here -->
+                </div>
+                <div class="action-btns" id="modalAppointmentActions">
+                    <!-- Action buttons will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const authSection = document.getElementById('authSection');
+            const mainApp = document.getElementById('mainApp');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const showRegister = document.getElementById('showRegister');
+            const showLogin = document.getElementById('showLogin');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const authMessage = document.getElementById('authMessage');
+            const regMessage = document.getElementById('regMessage');
+            
+            // Navigation buttons
+            const dashboardBtn = document.getElementById('dashboardBtn');
+            const patientsBtn = document.getElementById('patientsBtn');
+            const addPatientBtn = document.getElementById('addPatientBtn');
+            const appointmentsBtn = document.getElementById('appointmentsBtn');
+            const addAppointmentBtn = document.getElementById('addAppointmentBtn');
+            
+            // Sections
+            const sections = {
+                dashboard: document.getElementById('dashboardSection'),
+                patients: document.getElementById('patientsSection'),
+                addPatient: document.getElementById('addPatientSection'),
+                appointments: document.getElementById('appointmentsSection'),
+                addAppointment: document.getElementById('addAppointmentSection')
+            };
+            
+            // Forms
+            const patientForm = document.getElementById('patientForm');
+            const appointmentForm = document.getElementById('appointmentForm');
+            const patientMessage = document.getElementById('patientMessage');
+            const appointmentMessage = document.getElementById('appointmentMessage');
+            
+            // Modal
+            const appointmentModal = document.getElementById('appointmentModal');
+            
+            // Initialize data if not exists
+            if (!localStorage.getItem('users')) {
+                localStorage.setItem('users', JSON.stringify([]));
+            }
+            
+            if (!localStorage.getItem('patients')) {
+                localStorage.setItem('patients', JSON.stringify([]));
+            }
+            
+            if (!localStorage.getItem('appointments')) {
+                localStorage.setItem('appointments', JSON.stringify([]));
+            }
+            
+            // Check if user is already logged in
+            if (sessionStorage.getItem('loggedInUser')) {
+                authSection.style.display = 'none';
+                mainApp.style.display = 'block';
+                updateDashboardStats();
+                loadPatients();
+                loadAppointments();
+                loadPatientDropdown();
+            }
+            
+            // Toggle between login and register forms
+            showRegister.addEventListener('click', function(e) {
+                e.preventDefault();
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            });
+            
+            showLogin.addEventListener('click', function(e) {
+                e.preventDefault();
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+            });
+            
+            // Login functionality
+            loginBtn.addEventListener('click', function() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                const users = JSON.parse(localStorage.getItem('users'));
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+                    authSection.style.display = 'none';
+                    mainApp.style.display = 'block';
+                    updateDashboardStats();
+                    loadPatients();
+                    loadAppointments();
+                    loadPatientDropdown();
+                } else {
+                    authMessage.textContent = 'Invalid username or password';
+                    authMessage.className = 'message error';
+                }
+            });
+            
+            // Register functionality
+            registerBtn.addEventListener('click', function() {
+                const username = document.getElementById('regUsername').value;
+                const password = document.getElementById('regPassword').value;
+                
+                if (username.length < 4 || password.length < 4) {
+                    regMessage.textContent = 'Username and password must be at least 4 characters';
+                    regMessage.className = 'message error';
+                    return;
+                }
+                
+                const users = JSON.parse(localStorage.getItem('users'));
+                const userExists = users.some(u => u.username === username);
+                
+                if (userExists) {
+                    regMessage.textContent = 'Username already exists';
+                    regMessage.className = 'message error';
+                    return;
+                }
+                
+                const newUser = { username, password };
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                regMessage.textContent = 'Registration successful! Please login';
+                regMessage.className = 'message success';
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+            });
+            
+            // Logout functionality
+            logoutBtn.addEventListener('click', function() {
+                sessionStorage.removeItem('loggedInUser');
+                mainApp.style.display = 'none';
+                authSection.style.display = 'block';
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                authMessage.textContent = '';
+            });
+            
+            // Navigation
+            dashboardBtn.addEventListener('click', () => showSection('dashboard'));
+            patientsBtn.addEventListener('click', () => {
+                showSection('patients');
+                loadPatients();
+            });
+            addPatientBtn.addEventListener('click', () => {
+                showSection('addPatient');
+                patientForm.reset();
+                patientMessage.textContent = '';
+            });
+            appointmentsBtn.addEventListener('click', () => {
+                showSection('appointments');
+                loadAppointments();
+            });
+            addAppointmentBtn.addEventListener('click', () => {
+                showSection('addAppointment');
+                loadPatientDropdown();
+                appointmentForm.reset();
+                appointmentMessage.textContent = '';
+            });
+            
+            function showSection(sectionToShow) {
+                // Hide all sections
+                Object.values(sections).forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show the selected section
+                sections[sectionToShow].classList.add('active');
+            }
+            
+            // Patient form submission
+            patientForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('patientName').value;
+                
+                if (!name) {
+                    patientMessage.textContent = 'Patient name is required';
+                    patientMessage.className = 'message error';
+                    return;
+                }
+                
+                const newPatient = {
+                    id: Date.now(),
+                    name: name,
+                    age: document.getElementById('patientAge').value,
+                    gender: document.getElementById('patientGender').value,
+                    phone: document.getElementById('patientPhone').value,
+                    address: document.getElementById('patientAddress').value,
+                    transport: document.getElementById('patientTransport').value,
+                    emergencyContact: document.getElementById('patientEmergencyContact').value,
+                    createdAt: new Date().toISOString()
+                };
+                
+                const patients = JSON.parse(localStorage.getItem('patients'));
+                patients.push(newPatient);
+                localStorage.setItem('patients', JSON.stringify(patients));
+                
+                patientMessage.textContent = 'Patient added successfully';
+                patientMessage.className = 'message success';
+                
+                // Reset form
+                patientForm.reset();
+                
+                // Update dashboard stats and patient dropdown
+                updateDashboardStats();
+                loadPatientDropdown();
+            });
+            
+            // Load patients into table
+            function loadPatients(searchTerm = '') {
+                const patients = JSON.parse(localStorage.getItem('patients'));
+                const patientsList = document.getElementById('patientsList');
+                
+                patientsList.innerHTML = '';
+                
+                const filteredPatients = searchTerm 
+                    ? patients.filter(patient => 
+                        patient.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    : patients;
+                
+                if (filteredPatients.length === 0) {
+                    patientsList.innerHTML = '<tr><td colspan="5">No patients found</td></tr>';
+                    return;
+                }
+                
+                filteredPatients.forEach(patient => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${patient.name}</td>
+                        <td>${patient.age || '-'}</td>
+                        <td>${patient.phone || '-'}</td>
+                        <td>${patient.transport || '-'}</td>
+                        <td class="action-btns">
+                            <button onclick="viewPatient(${patient.id})">View</button>
+                            <button onclick="deletePatient(${patient.id})" class="btn-danger">Delete</button>
+                        </td>
+                    `;
+                    patientsList.appendChild(row);
+                });
+            }
+            
+            // Load patients into dropdown
+            function loadPatientDropdown() {
+                const patients = JSON.parse(localStorage.getItem('patients'));
+                const patientDropdown = document.getElementById('appointmentPatient');
+                
+                // Clear existing options except the first one
+                while (patientDropdown.options.length > 1) {
+                    patientDropdown.remove(1);
+                }
+                
+                if (patients.length === 0) {
+                    return;
+                }
+                
+                patients.forEach(patient => {
+                    const option = document.createElement('option');
+                    option.value = patient.id;
+                    option.textContent = patient.name;
+                    patientDropdown.appendChild(option);
+                });
+            }
+            
+            // Appointment form submission
+            appointmentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const patientId = parseInt(document.getElementById('appointmentPatient').value);
+                const date = document.getElementById('appointmentDate').value;
+                const time = document.getElementById('appointmentTime').value;
+                const purpose = document.getElementById('appointmentPurpose').value;
+                
+                if (!patientId || !date || !time || !purpose) {
+                    appointmentMessage.textContent = 'Please fill all required fields';
+                    appointmentMessage.className = 'message error';
+                    return;
+                }
+                
+                const newAppointment = {
+                    id: Date.now(),
+                    patientId: patientId,
+                    date: date,
+                    time: time,
+                    purpose: purpose,
+                    notes: document.getElementById('appointmentNotes').value,
+                    status: 'Scheduled',
+                    createdAt: new Date().toISOString()
+                };
+                
+                const appointments = JSON.parse(localStorage.getItem('appointments'));
+                appointments.push(newAppointment);
+                localStorage.setItem('appointments', JSON.stringify(appointments));
+                
+                appointmentMessage.textContent = 'Appointment scheduled successfully';
+                appointmentMessage.className = 'message success';
+                
+                // Reset form
+                appointmentForm.reset();
+                
+                // Update dashboard stats and appointments list
+                updateDashboardStats();
+                loadAppointments();
+            });
+            
+            // Load appointments into table
+            function loadAppointments() {
+                const appointments = JSON.parse(localStorage.getItem('appointments'));
+                const patients = JSON.parse(localStorage.getItem('patients'));
+                const appointmentsList = document.getElementById('appointmentsList');
+                const filterValue = document.getElementById('appointmentFilter').value;
+                
+                appointmentsList.innerHTML = '';
+                
+                let filteredAppointments = appointments;
+                
+                // Apply filter
+                if (filterValue === 'upcoming') {
+                    filteredAppointments = appointments.filter(app => 
+                        app.status === 'Scheduled' && 
+                        new Date(app.date) >= new Date()
+                    );
+                } else if (filterValue === 'completed') {
+                    filteredAppointments = appointments.filter(app => 
+                        app.status === 'Completed'
+                    );
+                } else if (filterValue === 'cancelled') {
+                    filteredAppointments = appointments.filter(app => 
+                        app.status === 'Cancelled'
+                    );
+                }
+                
+                if (filteredAppointments.length === 0) {
+                    appointmentsList.innerHTML = '<tr><td colspan="6">No appointments found</td></tr>';
+                    return;
+                }
+                
+                filteredAppointments.forEach(appointment => {
+                    const patient = patients.find(p => p.id === appointment.patientId);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${patient ? patient.name : 'Unknown Patient'}</td>
+                        <td>${new Date(appointment.date).toLocaleDateString()}</td>
+                        <td>${appointment.time}</td>
+                        <td>${appointment.purpose}</td>
+                        <td>${appointment.status}</td>
+                        <td class="action-btns">
+                            <button onclick="viewAppointment(${appointment.id})">View</button>
+                            ${appointment.status === 'Scheduled' ? 
+                                `<button onclick="completeAppointment(${appointment.id})" class="btn-success">Complete</button>
+                                <button onclick="cancelAppointment(${appointment.id})" class="btn-danger">Cancel</button>` : 
+                                ''}
+                        </td>
+                    `;
+                    appointmentsList.appendChild(row);
+                });
+            }
+            
+            // Update dashboard statistics
+            function updateDashboardStats() {
+                const patients = JSON.parse(localStorage.getItem('patients'));
+                const appointments = JSON.parse(localStorage.getItem('appointments'));
+                
+                document.getElementById('totalPatients').textContent = patients.length;
+                
+                const upcoming = appointments.filter(a => 
+                    a.status === 'Scheduled' && 
+                    new Date(a.date) >= new Date()
+                ).length;
+                
+                const completed = appointments.filter(a => 
+                    a.status === 'Completed'
+                ).length;
+                
+                document.getElementById('upcomingAppointments').textContent = upcoming;
+                document.getElementById('completedAppointments').textContent = completed;
+            }
+            
+            // View patient details
+            window.viewPatient = function(id) {
+                const patients = JSON.parse(localStorage.getItem('patients'));
+                const patient = patients.find(p => p.id === id);
+                
+                if (patient) {
+                    let details = `
+                        <h3>${patient.name}</h3>
+                        <p><strong>Age:</strong> ${patient.age || 'Not specified'}</p>
+                        <p><strong>Gender:</strong> ${patient.gender || 'Not specified'}</p>
+                        <p><strong>Phone:</strong> ${patient.phone || 'Not specified'}</p>
+                        <p><strong>Address:</strong> ${patient.address || 'Not specified'}</p>
+                        <p><strong>Transport Mode:</strong> ${patient.transport || 'Not specified'}</p>
+                        <p><strong>Emergency Contact:</strong> ${patient.emergencyContact || 'Not specified'}</p>
+                    `;
+                    
+                    alert(details);
+                }
+            };
+            
+            // Delete patient
+            window.deletePatient = function(id) {
+                if (confirm('Are you sure you want to delete this patient?')) {
+                    let patients = JSON.parse(localStorage.getItem('patients'));
+                    patients = patients.filter(p => p.id !== id);
+                    localStorage.setItem('patients', JSON.stringify(patients));
+                    
+                    // Also remove any appointments for this patient
+                    let appointments = JSON.parse(localStorage.getItem('appointments'));
+                    appointments = appointments.filter(a => a.patientId !== id);
+                    localStorage.setItem('appointments', JSON.stringify(appointments));
+                    
+                    loadPatients();
+                    loadPatientDropdown();
+                    loadAppointments();
+                    updateDashboardStats();
+                }
+            };
+            
+            // View appointment details
+            window.viewAppointment = function(id) {
+                const appointments = JSON.parse(localStorage.getItem('appointments'));
+                const patients = JSON.parse(localStorage.getItem('patients'));
+                
+                const appointment = appointments.find(a => a.id === id);
+                if (!appointment) return;
+                
+                const patient = patients.find(p => p.id === appointment.patientId);
+                
+                document.getElementById('modalAppointmentTitle').textContent = 'Appointment Details';
+                
+                let content = `
+                    <p><strong>Patient:</strong> ${patient ? patient.name : 'Unknown Patient'}</p>
+                    <p><strong>Date:</strong> ${new Date(appointment.date).toLocaleDateString()}</p>
+                    <p><strong>Time:</strong> ${appointment.time}</p>
+                    <p><strong>Purpose:</strong> ${appointment.purpose}</p>
+                    <p><strong>Status:</strong> ${appointment.status}</p>
+                    <p><strong>Notes:</strong> ${appointment.notes || 'None'}</p>
+                `;
+                
+                document.getElementById('modalAppointmentContent').innerHTML = content;
+                
+                let actions = '';
+                if (appointment.status === 'Scheduled') {
+                    actions = `
+                        <button onclick="completeAppointment(${appointment.id})" class="btn-success">Mark as Complete</button>
+                        <button onclick="cancelAppointment(${appointment.id})" class="btn-danger">Cancel Appointment</button>
+                    `;
+                }
+                
+                document.getElementById('modalAppointmentActions').innerHTML = actions;
+                appointmentModal.style.display = 'flex';
+            };
+            
+            // Complete appointment
+            window.completeAppointment = function(id) {
+                let appointments = JSON.parse(localStorage.getItem('appointments'));
+                const index = appointments.findIndex(a => a.id === id);
+                
+                if (index !== -1) {
+                    appointments[index].status = 'Completed';
+                    localStorage.setItem('appointments', JSON.stringify(appointments));
+                    
+                    loadAppointments();
+                    updateDashboardStats();
+                    closeModal();
+                }
+            };
+            
+            // Cancel appointment
+            window.cancelAppointment = function(id) {
+                if (confirm('Are you sure you want to cancel this appointment?')) {
+                    let appointments = JSON.parse(localStorage.getItem('appointments'));
+                    const index = appointments.findIndex(a => a.id === id);
+                    
+                    if (index !== -1) {
+                        appointments[index].status = 'Cancelled';
+                        localStorage.setItem('appointments', JSON.stringify(appointments));
+                        
+                        loadAppointments();
+                        updateDashboardStats();
+                        closeModal();
+                    }
+                }
+            };
+            
+            // Close modal
+            window.closeModal = function() {
+                appointmentModal.style.display = 'none';
+            };
+            
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target === appointmentModal) {
+                    closeModal();
+                }
+            };
+        });
+    </script>
+</body>
+</html>
